@@ -24,7 +24,12 @@ export async function getStaticPaths() {
 const { article } = Astro.params;
 const blog = await getBlogDetail(article as string);
 
-let $ = load(sanitizeHtml(blog.content));
+const safeHtml = sanitizeHtml(blog.content, { allowedAttributes: {
+	...sanitizeHtml.defaults.allowedAttributes,
+	'*': ["class"],
+}});
+
+let $ = load(safeHtml, {}, false);
 
 const innerTexts: string[] = [];
 $("code").each((_, elm) => {
@@ -58,7 +63,7 @@ $("pre code").each((_, elm) => {
 	$(elm).addClass("hljs");
 });
 
-blog.content = $.html();
+blog.content = $.root().html() ?? '';
 ---
 
 <Layout pageTitle={blog.title}>
