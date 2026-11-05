@@ -5,7 +5,6 @@ on:
     branches: [ main ]
   repository_dispatch:
     types: [ update ]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -15,12 +14,26 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: github-pages
     env:
       MICROCMS_SERVICE_DOMAIN: ${{ secrets.MICROCMS_SERVICE_DOMAIN }}
       MICROCMS_API_KEY: ${{ secrets.MICROCMS_API_KEY }}
     steps:
       - name: Checkout your repository using git
         uses: actions/checkout@v4
+      - name: Check MicroCMS environment
+        run: |
+          if [ -z "$MICROCMS_SERVICE_DOMAIN" ]; then
+            echo "::error::MICROCMS_SERVICE_DOMAIN is missing"
+            exit 1
+          fi
+
+          if [ -z "$MICROCMS_API_KEY" ]; then
+            echo "::error::MICROCMS_API_KEY is missing"
+            exit 1
+          fi
+
+          echo "MicroCMS environment variables are configured."
       - name: Install, build, and upload your site
         uses: withastro/action@v3
         with:
