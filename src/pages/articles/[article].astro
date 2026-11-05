@@ -1,0 +1,75 @@
+---
+import dayjs from 'dayjs';
+import sanitizeHtml from 'sanitize-html'
+import katex from 'katex';
+import hljs from 'highlight.js';
+import { load } from 'cheerio'
+
+import 'highlight.js/styles/atom-one-dark.css'
+import "katex/dist/katex.min.css"
+
+import Layout from '../../layouts/Layout.astro';
+import Taglist from '../../components/Taglist.astro';
+
+import type { Blog } from '../../lib/microcms.ts'
+import { getBlogs, getBlogDetail } from '../../lib/microcms.ts';
+
+export async function getStaticPaths() {
+	const response = await getBlogs({ fields: ["id"] });
+	return response.contents.map((content: Blog) => ({
+		params: { article: content.id }
+	}));
+}
+
+const { article } = Astro.params;
+const blog = await getBlogDetail(article as string);
+
+let $ = load(sanitizeHtml(blog.content));
+
+const innerTexts: string[] = [];
+$("code").each((_, elm) => {
+  	innerTexts.push($(elm).text());
+  	$(elm).text("");
+});
+
+const renderedDisplayText = blog.content.replaceAll(/\$\$[^\$]+\$\$/g, (text: string) => {
+	return katex.renderToString(
+		text.replaceAll("$", "").replaceAll(/(<br>|<\\br>|<br \/>|&nbsp;|amp;)/g, ""),
+		{ output: "html", displayMode: true }
+	);
+});
+
+const renderedText = renderedDisplayText.replaceAll(/\$[^\$]+\$/g, (text: string) => {
+  	return katex.renderToString(
+		text.replaceAll("$", "").replaceAll(/(<br>|<\\br>|<br \/>|&nbsp;|amp;)/g, ""),
+		{ output: "html", displayMode: false }
+	);
+});
+
+$ = load(renderedText);
+
+$("code").each((idx, elm) => {
+	$(elm).text(innerTexts[idx]);
+});
+
+$("pre code").each((_, elm) => {
+	const result = hljs.highlightAuto($(elm).text());
+	$(elm).html(result.value);
+	$(elm).addClass("hljs");
+});
+
+blog.content = $.html();
+---
+
+<Layout pageTitle={blog.title}>
+	<div class="meta">
+		<h1>{blog.title}</h1>
+		<h2>{blog.description}</h2>
+		<p>作成日：{dayjs(blog.createdAt).format("YYYY/MM/DD")}</p>
+		<p>更新日：{dayjs(blog.updatedAt).format("YYYY/MM/DD")}</p>
+		<Taglist tags={blog.tags}/>
+		{blog.bumper?.url && <img src={blog.bumper.url} alt={blog.bumper.alt}/>}
+	</div>
+	<hr/>
+	<div class="content" set:html={blog.content}></div>
+</Layout>

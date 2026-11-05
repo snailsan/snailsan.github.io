@@ -1,0 +1,20 @@
+---
+import type { Tag } from "../lib/microcms.ts";
+
+interface Props {
+    tags: Tag[];
+    mark?: string;
+};
+
+const { tags, mark } = Astro.props;
+---
+
+<ul class="linked-tags">
+    {
+        tags.map((tag: Tag) => (
+            <a href={"/tags/" + tag.id} class={mark ? "chosen" : null}>
+                <li>{tag.name}</li>
+            </a>
+        ))
+    }
+</ul>

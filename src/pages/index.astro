@@ -1,0 +1,13 @@
+---
+import sanitizeHtml from 'sanitize-html'
+
+import Layout from '../layouts/Layout.astro';
+const pageTitle = "Home";
+
+import { get } from '../lib/microcms.ts';
+const post = await get("news");
+---
+
+<Layout pageTitle={pageTitle}>
+	<div class="post" set:html={sanitizeHtml(post.content)}/>
+</Layout>

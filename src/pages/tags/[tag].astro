@@ -1,0 +1,24 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import LinkedTaglist from '../../components/Linked-taglist.astro';
+import Blogs from '../../components/Blogs.astro';
+
+import type { Tag } from '../../lib/microcms.ts'
+import { getTags, getBlogs } from '../../lib/microcms.ts';
+
+export async function getStaticPaths() {
+	const response = await getTags();
+	return response.contents.map((content: Tag) => ({
+		params: { tag: content.id }
+	}));
+}
+
+const { tag } = Astro.params;
+const tags = await getTags();
+const blogs = await getBlogs({ filters:  "tags[contains]" + tag });
+---
+
+<Layout pageTitle={tag}>
+	<LinkedTaglist tags={tags.contents} mark={tag}/>
+	<Blogs blog={blogs.contents}/>
+</Layout>

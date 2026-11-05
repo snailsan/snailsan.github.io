@@ -1,0 +1,14 @@
+---
+import type { Tag } from "../lib/microcms.ts";
+
+interface Props { tags: Tag[]; };
+const { tags } = Astro.props;
+---
+
+<ul class="tags">
+    {
+        tags.map((tag: Tag) => (
+            <li>{tag.name}</li>
+        ))
+    }
+</ul>

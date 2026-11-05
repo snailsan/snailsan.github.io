@@ -1,0 +1,35 @@
+---
+import dayjs from "dayjs";
+
+import type { Tag, Blog } from "../lib/microcms.ts";
+
+interface Props { blog: Blog[]; };
+const { blog } = Astro.props;
+---
+
+<ul>
+    {
+        blog.map((content: Blog) => (
+            <li class="article">
+                <a href={"/articles/" + content.id}>
+                    {content.bumper?.url &&
+                        <img
+                            src={content.bumper.url}
+                            alt={content.title}
+                            width={content.bumper.width}
+                            height={content.bumper.height}
+                        />
+                    }
+                    <div class="info">
+                        <p>{dayjs(content.createdAt).format("YYYY/MM/DD")}</p>
+                        <h2>{content.title}</h2>
+                        <p>{content.description}</p>
+                        <ul class="tags">
+                            {content.tags.map((tag: Tag) => (<li>{tag.name}</li>))}
+                        </ul>
+                    </div>
+                </a>
+            </li>
+        ))
+    }
+</ul>

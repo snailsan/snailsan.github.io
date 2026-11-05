@@ -1,0 +1,16 @@
+---
+import Layout from '../layouts/Layout.astro';
+import LinkedTaglist from '../components/Linked-taglist.astro';
+import Blogs from '../components/Blogs.astro';
+
+import { getBlogs, getTags } from "../lib/microcms.ts";
+
+const pageTitle = "Articles";
+const tags = await getTags();
+const blog = await getBlogs({ fields: ["id", "title", "description", "bumper", "content", "tags", "createdAt"] });
+---
+
+<Layout pageTitle={pageTitle}>
+	<LinkedTaglist tags={tags.contents}/>
+	<Blogs blog={blog.contents}/>
+</Layout>
