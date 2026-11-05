@@ -1,3 +1,6 @@
 import { defineConfig } from "astro/config";
 
-export default defineConfig();
+export default defineConfig({
+    site: 'https://snailsan.github.io',
+    base: '/snailsan.github.io',
+});
