@@ -51,7 +51,7 @@ const renderedText = renderedDisplayText.replaceAll(/\$[^\$]+\$/g, (text: string
 	);
 });
 
-$ = load(renderedText);
+$ = load(renderedText, {}, false);
 
 $("code").each((idx, elm) => {
 	$(elm).text(innerTexts[idx]);
